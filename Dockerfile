@@ -50,8 +50,6 @@ COPY grib2ToCovjson.py   ./
 COPY converter   ./
 COPY crontab   /etc/cron.d/crontab
 
-RUN chmod 0644 /etc/cron.d/crontab && \
-    crontab /etc/cron.d/crontab && \
-    chmod 0744 ./grib2ToCovjson.py
+RUN crontab /etc/cron.d/crontab
 
 CMD ["cron", "-f"]
