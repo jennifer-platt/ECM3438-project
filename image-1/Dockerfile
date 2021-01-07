@@ -13,13 +13,13 @@ RUN apt-get update -q && \
         libxext6 \
         libxrender1 \
         wget \
-        # zip \
+        zip \
     && apt-get clean
 
 ENV PATH /opt/conda/bin:$PATH
 
 # Leave these args here to better use the Docker build cache
-ARG CONDA_VERSION=py37_4.8.2
+ARG CONDA_VERSION=py38_4.9.2
 ARG CONDA_MD5=122c8c9beb51e124ab32a0fa6426c656
 
 RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-${CONDA_VERSION}-Linux-x86_64.sh -O miniconda.sh && \
@@ -35,32 +35,27 @@ RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-${CONDA_VERSION}
     find /opt/conda/ -follow -type f -name '*.js.map' -delete && \
     /opt/conda/bin/conda clean -afy
 
-RUN conda install -c conda-forge requests && \
-    conda install -c conda-forge python-cdo && \
-    conda install -c conda-forge nco && \
-    conda install -c conda-forge netcdf4 && \
-    conda install -c conda-forge boto3 && \
-    conda install -c conda-forge scipy && \
-    conda install -c conda-forge numpy && \
-    conda install -c conda-forge pandas && \
-    conda install -c conda-forge xarray && \
-    python3.7 -m pip install awslambdaric --target /opt/conda/lib/python3.7/site-packages
+# RUN conda install -c conda-forge requests && \
+#     conda install -c conda-forge python-cdo && \
+#     conda install -c conda-forge nco && \
+#     conda install -c conda-forge netcdf4 && \
+#     conda install -c conda-forge boto3 && \
+#     conda install -c conda-forge xarray && \
+#     python3.7 -m pip install awslambdaric --target /opt/conda/lib/python3.7/site-packages
 
+# FROM public.ecr.aws/lambda/python:3.7
 
+# COPY --from=build-image /opt/conda/lib/python3.7/site-packages ./
+# COPY index.py   ./
+# COPY converter   ./
 
-FROM public.ecr.aws/lambda/python:3.8
+# # ENTRYPOINT [ "exec /opt/conda/bin/python -m awslambdaric $1" ]
+# CMD ["index.handler"]     
 
-COPY --from=build-image /opt/conda/lib/python3.7/site-packages /home/app/
-COPY index.py   /home/app/
-COPY converter   /home/app/
+# # RUN cd /opt/conda/lib/python3.7/site-packages && \
+# #     zip -r ../../../../../my-deployment-package.zip . && \
+# #     cd ../../../../../ && \
+# #     zip -g my-deployment-package.zip index.py && \
+# #     zip -r my-deployment-package.zip pycovjson
 
-ENTRYPOINT [ "exec /usr/local/bin/python -m awslambdaric $1" ]
-CMD ["app.handler"]     
-
-# RUN cd /opt/conda/lib/python3.7/site-packages && \
-#     zip -r ../../../../../my-deployment-package.zip . && \
-#     cd ../../../../../ && \
-#     zip -g my-deployment-package.zip index.py && \
-#     zip -r my-deployment-package.zip pycovjson
-
-# CMD ["python", "index.handler"]
+# # CMD ["python", "index.handler"]
