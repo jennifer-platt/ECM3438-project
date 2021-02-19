@@ -1,14 +1,8 @@
-ARG FUNCTION_DIR="/home/"
-
 FROM python:3.8-slim-buster
-ARG FUNCTION_DIR
-RUN mkdir -p ${FUNCTION_DIR}
-COPY index.py ${FUNCTION_DIR}
 
 LABEL MAINTAINER="Anaconda, Inc"
 
 ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
-# ENV CONDA_PKGS_DIRS=/usr/local/lib/python3.8/site-packages
 
 RUN apt-get update -q && \
     apt-get install -q -y \
@@ -20,11 +14,6 @@ RUN apt-get update -q && \
         libxext6 \
         libxrender1 \
         wget \
-        g++ \
-        make \
-        cmake \
-        unzip \
-        libcurl4-openssl-dev \
     && apt-get clean
 
 ENV PATH /opt/conda/bin:$PATH
@@ -47,9 +36,9 @@ RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-${CONDA_VERSION}
 
 RUN conda install -c conda-forge boto3 mock nco netcdf4 numpy pandas python-cdo scipy requests xarray
 
-RUN /usr/local/bin/python3 -m pip install awslambdaric
+RUN python3 -m pip install awslambdaric
 
-WORKDIR ${FUNCTION_DIR}
+COPY index.py ./
 
-ENTRYPOINT [ "/usr/local/bin/python3", "-m", "awslambdaric" ]
+ENTRYPOINT [ "/opt/conda/bin/python3", "-m", "awslambdaric" ]
 CMD [ "index.converter" ]
